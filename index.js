@@ -33,8 +33,11 @@ app.get("/", function (req, res) {
   });
 });
 
+
+
 app.post("/transfer", async function (req, res) {
-  console.log(req.body);
+  const id = Date.now().toString()
+  console.log(id)
   const {
     loginSource,
     loginDest,
@@ -51,19 +54,39 @@ app.post("/transfer", async function (req, res) {
     serverSource == "" ||
     serverDest == ""
   ) {
-    res.redirect("/");
+    res.render("index", {
+      loginSource: loginSource,
+      loginDest: loginDest,
+      passwordSource: passwordSource,
+      passwordDest: passwordDest,
+      serverSource: serverSource,
+      serverDest: serverDest,
+    })
   } else {
-    console.log(
-      await grabIMAP(
+    let result = await grabIMAP(
         loginSource,
         loginDest,
         passwordSource,
         passwordDest,
         serverSource,
-        serverDest
+        serverDest,
+        id
       )
-    );
-    res.redirect("/finished");
+
+      if(result == false){
+        res.render("index", {
+          loginSource: loginSource,
+          loginDest: loginDest,
+          passwordSource: passwordSource,
+          passwordDest: passwordDest,
+          serverSource: serverSource,
+          serverDest: serverDest,
+        })
+      }else{
+        res.redirect("/finished");
+      }
+
+
   }
 });
 app.get("/finished", function (req, res) {

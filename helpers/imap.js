@@ -1,6 +1,7 @@
 const { ImapFlow } = require("imapflow");
 const fs = require("fs");
 const simpleParser = require("mailparser").simpleParser;
+const path = require("path");
 
 function client(login, password, server) {
   return new ImapFlow({
@@ -14,43 +15,69 @@ function client(login, password, server) {
   });
 }
 
+async function sendFile(id) {}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 async function grabIMAP(
   loginSource,
   loginDest,
   passwordSource,
   passwordDest,
   serverSource,
-  serverDest
+  serverDest,
+  id
 ) {
-  const source = client(loginSource, passwordSource, serverSource);
-  await source.connect();
-  const dest = client(loginDest, passwordDest, serverDest);
-  await dest.connect();
-
-  let lock = await source.getMailboxLock("INBOX");
-  const folder = Date.now();
-  let parsed;
+  let source, dest;
   try {
-    const { uid } = await source.fetchOne("*", { uid: true });
-    for (i = 1; i < uid; i++) {
-      try {
-        let { meta, content } = await source.download(i);
-        await content.pipe(fs.createWriteStream("tmp.eml"));
-      } catch (e) {
-        console.log(e);
-      } finally {
-        const buf = Buffer.from(fs.readFileSync("./tmp.eml"));
-        await dest.append("INBOX", buf);
-      }
-    }
+    source = client(loginSource, passwordSource, serverSource);
+    await source.connect();
+    dest = client(loginDest, passwordDest, serverDest);
+    await dest.connect();
   } catch (e) {
     console.log(e);
-  } finally {
-    lock.release();
   }
-  await source.logout();
-  await dest.logout();
-  return "yes";
+
+  if (source == undefined || dest == undefined) {
+    return false;
+  } else {
+    let lock = await source.getMailboxLock("INBOX");
+    const folder = Date.now();
+    let parsed;
+    try {
+      const { uid } = await source.fetchOne("*", { uid: true });
+      for (i = 1; i < uid; i++) {
+        try {
+          let { meta, content } = await source.download(i);
+          await content.pipe(
+            await fs.createWriteStream(path.resolve(__dirname, "./" + id))
+          );
+        } catch (e) {
+          console.log(e);
+          return false;
+        } finally {
+          await sleep(100);
+          const buf = await Buffer.from(
+            await fs.readFileSync(path.resolve(__dirname, "./" + id))
+          );
+          await dest.append("INBOX", buf);
+          fs.rmSync(path.resolve(__dirname, "./" + id));
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      return false;
+    } finally {
+      lock.release();
+    }
+    await source.logout();
+    await dest.logout();
+    return true;
+  }
 }
 
 module.exports = {

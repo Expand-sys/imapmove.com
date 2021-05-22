@@ -19,10 +19,11 @@ html
     .container
       center
         h1 IMAP Move 
-        h4 I am going to make this simple as its not a look pretty site its a mail sync tool and will do what you need
+        h2 I am going to make this simple as its not a look pretty site its a mail sync tool and will do what you need
+        p BTW this tool does not log any passwords or emails or anything, im providing this tool free because i dont need much to run it
         br
     .container-lg
-      form(method='POST', action='/transfer' enctype='json')
+      form(method='POST', action='/transfer' enctype='json' autocomplete="off")
         .card.bg-dark
           
           .row
@@ -31,22 +32,22 @@ html
           
               .card-text.text-white
                 label Login
-                input.form-control(name='loginSource', type='text' placeholder='Login' required=true)
+                input.form-control(name='loginSource', type='text' placeholder='Login' autocomplete="off" value=loginSource)
                 label Password
-                input.form-control(name='passwordSource', type='password' placeholder='Password')
+                input.form-control(name='passwordSource', type='password' placeholder='Password' autocomplete="off" value=passwordSource)
                 label IMAP-Server
-                input.form-control(name='serverSource', type='text' placeholder='IMAP-Server')
+                input.form-control(name='serverSource', type='text' placeholder='IMAP-Server' autocomplete="off" value=serverSource)
                 
             .col 
               h5.text-white DESTINATION
           
               .card-text.text-white
                 label Login
-                input.form-control(name='loginDest', type='text' placeholder='Login')
+                input.form-control(name='loginDest', type='text' placeholder='Login' autocomplete="off" value=loginDest)
                 label Password
-                input.form-control(name='passwordDest', type='password' placeholder='Password')
+                input.form-control(name='passwordDest', type='password' placeholder='Password' autocomplete="off" value=passwordDest)
                 label IMAP-Server
-                input.form-control(name='serverDest', type='text' placeholder='IMAP-Server')
+                input.form-control(name='serverDest', type='text' placeholder='IMAP-Server' autocomplete="off" value=serverDest)
                 
           br 
           input.btn.btn-primary(type='submit', value='Submit')
@@ -63,5 +64,4 @@ html
       center
         p IMAP move, it moves your mail simples
           
-    
-      script(src='/js/main.js')
+  value
