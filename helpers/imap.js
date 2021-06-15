@@ -2,6 +2,8 @@ const { ImapFlow } = require("imapflow");
 const fs = require("fs");
 const simpleParser = require("mailparser").simpleParser;
 const path = require("path");
+const { Worker } = require("worker_threads");
+const { StaticPool } = require("node-worker-threads-pool");
 
 function client(login, password, server) {
   return new ImapFlow({
@@ -50,23 +52,33 @@ async function grabIMAP(
     let parsed;
     try {
       const { uid } = await source.fetchOne("*", { uid: true });
+      const pool1 = new StaticPool({
+        size: 8,
+        task: "./helpers/download.js",
+      });
+      const pool2 = new StaticPool({
+        size: 8,
+        task: "./helpers/upload.js",
+      });
+
       for (i = 1; i < uid; i++) {
-        try {
-          let { meta, content } = await source.download(i);
-          await content.pipe(
-            await fs.createWriteStream(path.resolve(__dirname, "./" + id))
-          );
-        } catch (e) {
-          console.log(e);
-          return false;
-        } finally {
-          await sleep(100);
-          const buf = await Buffer.from(
-            await fs.readFileSync(path.resolve(__dirname, "./" + id))
-          );
-          await dest.append("INBOX", buf);
-          fs.rmSync(path.resolve(__dirname, "./" + id));
-        }
+        let num = i;
+        pool1
+          .exec({
+            id: num,
+            source: source,
+          })
+          .then((result) => {
+            console.log(result);
+          });
+        pool2
+          .exec({
+            id: num,
+            dest: dest,
+          })
+          .then((result) => {
+            console.log(result);
+          });
       }
     } catch (e) {
       console.log(e);
