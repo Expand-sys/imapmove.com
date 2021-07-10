@@ -12,9 +12,9 @@ function client(login, password, server) {
       user: login,
       pass: password,
     },
+    emitLogs: true,
   });
 }
-
 async function sendFile(id) {}
 
 function sleep(ms) {
@@ -30,6 +30,7 @@ async function grabIMAP(
   passwordDest,
   serverSource,
   serverDest,
+  socket,
   id
 ) {
   let source, dest;
@@ -41,7 +42,11 @@ async function grabIMAP(
   } catch (e) {
     console.log(e);
   }
-
+  source.on("log", (entry) => {
+    socket.emit(`log`, {
+      log: entry,
+    });
+  });
   if (source == undefined || dest == undefined) {
     return false;
   } else {

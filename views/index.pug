@@ -4,6 +4,10 @@ html
     title IMAP Move | GET IN YOUR HOME MAIL THIS IS YOUR HOME NOW
     link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css", integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l", crossorigin="anonymous")
     link(rel='stylesheet' href='/css/style.css')
+    script(src="js/socket.js" type="module")
+    <script src="https://cdn.socket.io/4.0.1/socket.io.js"></script>
+    script(src="http://code.jquery.com/jquery-1.11.1.js")
+
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
     meta(property='og:url' content='https://imapmove.com')
     meta(property='og:title' content='IMAP Move | GET IN YOUR HOME MAIL THIS IS YOUR HOME NOW')
@@ -23,7 +27,8 @@ html
         p BTW this tool does not log any passwords or emails or anything, im providing this tool free because i dont need much to run it
         br
     .container-lg
-      form(method='POST', action='/transfer' enctype='json' autocomplete="off")
+      form(method='POST', action='/transfer' enctype='json' autocomplete="off")#form.form
+      
         .card.bg-dark
           
           .row
@@ -32,27 +37,29 @@ html
           
               .card-text.text-white
                 label Login
-                input.form-control(name='loginSource', type='text' placeholder='Login' autocomplete="off" value=loginSource)
+                input.form-control(name='loginSource', id="loginSource" type='text' placeholder='Login' autocomplete="off" required)
                 label Password
-                input.form-control(name='passwordSource', type='password' placeholder='Password' autocomplete="off" value=passwordSource)
+                input.form-control(name='passwordSource',id="passwordSource" type='password' placeholder='Password' autocomplete="off" required)
                 label IMAP-Server
-                input.form-control(name='serverSource', type='text' placeholder='IMAP-Server' autocomplete="off" value=serverSource)
+                input.form-control(name='serverSource',id="serverSource" type='text' placeholder='IMAP-Server' autocomplete="off" required)
                 
             .col 
               h5.text-white DESTINATION
           
               .card-text.text-white
                 label Login
-                input.form-control(name='loginDest', type='text' placeholder='Login' autocomplete="off" value=loginDest)
+                input.form-control(name='loginDest',id="loginDest" type='text' placeholder='Login' autocomplete="off" required)
                 label Password
-                input.form-control(name='passwordDest', type='password' placeholder='Password' autocomplete="off" value=passwordDest)
+                input.form-control(name='passwordDest',id="passwordDest" type='password' placeholder='Password' autocomplete="off" required)
                 label IMAP-Server
-                input.form-control(name='serverDest', type='text' placeholder='IMAP-Server' autocomplete="off" value=serverDest)
+                input.form-control(name='serverDest',id="serverDest" type='text' placeholder='IMAP-Server' autocomplete="off" required )
                 
           br 
           input.btn.btn-primary(type='submit', value='Submit')
         h4 OUTPUT
-        .card
+        .card.log
+          ul#log
+          
           
     
     

@@ -1,10 +1,10 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
-const mongoose = require("mongoose");
-const io = require("socket.io");
+const http = require("http");
 const imap = require("imap-simple");
 const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 const { grabIMAP } = require("./helpers/imap.js");
 const app = express();
 const fs = require("fs");
@@ -24,6 +24,34 @@ app.use(
     saveUninitialized: true,
   })
 );
+var server = http.createServer();
+server.listen(1443);
+var io = require("socket.io")(server, {
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
+
+io.sockets.on("connection", function (socket) {
+  socket.on("submit", async function (data) {
+    console.log(data);
+    let id = uuidv4();
+    let result = await grabIMAP(
+      data.loginSource,
+      data.loginDest,
+      data.passwordSource,
+      data.passwordDest,
+      data.serverSource,
+      data.serverDest,
+      socket,
+      id
+    );
+  });
+  process.stdout.setEncoding("utf-8");
+  process.stdout.on("data", function (data) {
+    socket.emit("process_data", data);
+  });
+});
 
 app.get("/", function (req, res) {
   var ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
@@ -33,62 +61,6 @@ app.get("/", function (req, res) {
   });
 });
 
-
-
-app.post("/transfer", async function (req, res) {
-  const id = Date.now().toString()
-  console.log(id)
-  const {
-    loginSource,
-    loginDest,
-    passwordSource,
-    passwordDest,
-    serverSource,
-    serverDest,
-  } = req.body;
-  if (
-    loginSource == "" ||
-    loginDest == "" ||
-    passwordSource == "" ||
-    passwordDest == "" ||
-    serverSource == "" ||
-    serverDest == ""
-  ) {
-    res.render("index", {
-      loginSource: loginSource,
-      loginDest: loginDest,
-      passwordSource: passwordSource,
-      passwordDest: passwordDest,
-      serverSource: serverSource,
-      serverDest: serverDest,
-    })
-  } else {
-    let result = await grabIMAP(
-        loginSource,
-        loginDest,
-        passwordSource,
-        passwordDest,
-        serverSource,
-        serverDest,
-        id
-      )
-
-      if(result == false){
-        res.render("index", {
-          loginSource: loginSource,
-          loginDest: loginDest,
-          passwordSource: passwordSource,
-          passwordDest: passwordDest,
-          serverSource: serverSource,
-          serverDest: serverDest,
-        })
-      }else{
-        res.redirect("/finished");
-      }
-
-
-  }
-});
 app.get("/finished", function (req, res) {
   res.render("finished");
 });

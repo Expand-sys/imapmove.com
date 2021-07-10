@@ -1,0 +1,6 @@
+.log {
+  background-color: #eee;
+  overflow-y: scroll;
+  max-height: 350px;
+  box-sizing: border-box;
+}
