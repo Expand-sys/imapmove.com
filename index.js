@@ -1,6 +1,5 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const session = require("express-session");
 const http = require("http");
 const imap = require("imap-simple");
 const path = require("path");
@@ -17,13 +16,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.set("trust proxy", 1);
-app.use(
-  session({
-    secret: "expand dog",
-    resave: true,
-    saveUninitialized: true,
-  })
-);
 if (typeof PhusionPassenger != "undefined") {
   PhusionPassenger.configure({ autoInstall: false });
 }
