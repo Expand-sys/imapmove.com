@@ -24,6 +24,10 @@ app.use(
     saveUninitialized: true,
   })
 );
+if (typeof PhusionPassenger != "undefined") {
+  PhusionPassenger.configure({ autoInstall: false });
+}
+
 var server = http.createServer();
 server.listen(1443);
 var io = require("socket.io")(server, {
