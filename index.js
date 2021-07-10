@@ -57,6 +57,8 @@ app.get("/", function (req, res) {
   });
 });
 
-app.listen(process.env.PORT || 3000, function () {
-  console.log("Server started on port 3000...");
-});
+if (typeof PhusionPassenger != "undefined") {
+  app.listen("passenger");
+} else {
+  app.listen(3000);
+}
