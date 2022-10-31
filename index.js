@@ -59,5 +59,6 @@ app.get("/", function (req, res) {
 if (typeof PhusionPassenger != "undefined") {
   app.listen("passenger");
 } else {
-  app.listen(3000);
+  console.log("listening at 3000")
+  app.listen(3000, '0.0.0.0');
 }
