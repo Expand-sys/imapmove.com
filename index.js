@@ -20,7 +20,7 @@ if (typeof PhusionPassenger != "undefined") {
 }
 
 var server = http.createServer();
-server.listen(1443);
+server.listen(40051);
 var io = require("socket.io")(server, {
   cors: {
     origin: "*",
