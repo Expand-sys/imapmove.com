@@ -62,15 +62,14 @@ async function grabIMAP(
   if (source == undefined || dest == undefined) {
     return false;
   } else {
-    let arr = source.list()
-    let arr2 = dest.list()
-    for(let boxes in arr){
-      let lock = await source.getMailboxLock(`${boxes}`);
+    let arr = await source.list()
+    arr.forEach(async mailbox=>{
+      let lock = await source.getMailboxLock(`${mailbox.path}`);
       const folder = Date.now();
       let parsed;
       try {
         const { uid } = await source.fetchOne("*", { uid: true });
-        for (i = 1; i < uid; i++) {
+        for (let i = 1; i < uid; i++) {
           try {
             let { meta, content } = await source.download(i);
             await content.pipe(
@@ -84,8 +83,13 @@ async function grabIMAP(
             const buf = await Buffer.from(
               await fs.readFileSync(path.resolve(__dirname, "./" + id))
             );
-            var destbox = arr2.find(a =>a.includes(`${boxes}`));
-            await dest.append(`${destbox}`, buf);
+            try{
+              await dest.mailboxCreate(mailbox.path)
+            } catch(e){
+              //punch sand
+            }
+            
+            await dest.append(`${mailbox.path}`, buf);
             fs.rmSync(path.resolve(__dirname, "./" + id));
           }
         }
@@ -95,9 +99,8 @@ async function grabIMAP(
       } finally {
         lock.release();
       }  
-    }
+    });    
     console.log(arr)
-    console.log(arr2)
     await source.logout();
     await dest.logout();
     return true;
