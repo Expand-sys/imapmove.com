@@ -1,4 +1,4 @@
-const URL = "http://localhost:40051";
+const URL = "http://imapmove.com:40051";
 const socket = io(URL, { autoConnect: true });
 
 export default socket;
