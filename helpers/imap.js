@@ -23,6 +23,18 @@ function sleep(ms) {
   });
 }
 
+
+function containsAny(str, substrings) {
+  for (var i = 0; i != substrings.length; i++) {
+     var substring = substrings[i];
+     if (str.indexOf(substring) != - 1) {
+       return substring;
+     }
+  }
+  return null; 
+}
+
+
 async function grabIMAP(
   loginSource,
   loginDest,
@@ -51,38 +63,41 @@ async function grabIMAP(
     return false;
   } else {
     let arr = source.list()
+    let arr2 = dest.list()
     for(let boxes in arr){
-      console.log(boxes)
-    }
-    let lock = await source.getMailboxLock("INBOX");
-    const folder = Date.now();
-    let parsed;
-    try {
-      const { uid } = await source.fetchOne("*", { uid: true });
-      for (i = 1; i < uid; i++) {
-        try {
-          let { meta, content } = await source.download(i);
-          await content.pipe(
-            await fs.createWriteStream(path.resolve(__dirname, "./" + id))
-          );
-        } catch (e) {
-          console.log(e);
-          return false;
-        } finally {
-          await sleep(100);
-          const buf = await Buffer.from(
-            await fs.readFileSync(path.resolve(__dirname, "./" + id))
-          );
-          await dest.append("INBOX", buf);
-          fs.rmSync(path.resolve(__dirname, "./" + id));
+      let lock = await source.getMailboxLock(`${boxes}`);
+      const folder = Date.now();
+      let parsed;
+      try {
+        const { uid } = await source.fetchOne("*", { uid: true });
+        for (i = 1; i < uid; i++) {
+          try {
+            let { meta, content } = await source.download(i);
+            await content.pipe(
+              await fs.createWriteStream(path.resolve(__dirname, "./" + id))
+            );
+          } catch (e) {
+            console.log(e);
+            return false;
+          } finally {
+            await sleep(100);
+            const buf = await Buffer.from(
+              await fs.readFileSync(path.resolve(__dirname, "./" + id))
+            );
+            var destbox = arr2.find(a =>a.includes(`${boxes}`));
+            await dest.append(`${destbox}`, buf);
+            fs.rmSync(path.resolve(__dirname, "./" + id));
+          }
         }
-      }
-    } catch (e) {
-      console.log(e);
-      return false;
-    } finally {
-      lock.release();
+      } catch (e) {
+        console.log(e);
+        return false;
+      } finally {
+        lock.release();
+      }  
     }
+    console.log(arr)
+    console.log(arr2)
     await source.logout();
     await dest.logout();
     return true;
