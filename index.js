@@ -23,7 +23,7 @@ var server = http.createServer();
 server.listen(40051);
 var io = require("socket.io")(server, {
   cors: {
-    origin: "*",
+    origin: "https://imapmove.com",
   },
 });
 
