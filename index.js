@@ -23,9 +23,10 @@ var server = http.createServer();
 server.listen(1443);
 var io = require("socket.io")(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
   },
 });
+
 
 io.sockets.on("connection", function (socket) {
   socket.on("submit", async function (data) {

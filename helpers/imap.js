@@ -50,6 +50,10 @@ async function grabIMAP(
   if (source == undefined || dest == undefined) {
     return false;
   } else {
+    let arr = source.list()
+    for(let boxes in arr){
+      console.log(boxes)
+    }
     let lock = await source.getMailboxLock("INBOX");
     const folder = Date.now();
     let parsed;
